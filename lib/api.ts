@@ -4,7 +4,7 @@ import { Note } from '@/types/note';
 interface CreateNoteDto {
   title: string;
   content: string;
-  categoryId: string;
+  tag: string;
 }
 
 const api = axios.create({
