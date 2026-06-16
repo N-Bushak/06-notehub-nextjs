@@ -1,5 +1,11 @@
 import axios from 'axios';
-import { NotePayload, Note } from '@/types/note';
+import { Note } from '@/types/note';
+
+interface CreateNoteDto {
+  title: string;
+  content: string;
+  categoryId: string;
+}
 
 const api = axios.create({
   baseURL: 'https://next-v1-notes-api.goit.study/',
@@ -29,8 +35,9 @@ export const fetchNoteById = async (id: string): Promise<Note> => {
   return data;
 };
 
-export const createNote = (data: NotePayload): Promise<Note> => {
-  return api.post('/notes', data).then(res => res.data);
+export const createNote = async (data: CreateNoteDto): Promise<Note> => {
+  const response = await api.post('/notes', data);
+  return response.data;
 };
 
 export const deleteNote = async (id: string): Promise<Note> => {

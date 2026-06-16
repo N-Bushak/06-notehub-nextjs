@@ -10,6 +10,10 @@ interface NoteFormProps {
   onClose: () => void;
 }
 
+interface MutationContext {
+  actions: FormikHelpers<NewNote>;
+}
+
 interface LocalPayload {
   title: string;
   content: string;
@@ -37,11 +41,10 @@ export default function NoteForm({ onClose }: NoteFormProps) {
   const fieldID = useId();
   const queryClient = useQueryClient();
 
- const mutation = useMutation({
-    mutationFn: ({ payload }: { payload: LocalPayload; actions: FormikHelpers<NewNote> }) => 
-      createNote(payload), 
-    onSuccess: (_, variables) => {
-      variables.actions.resetForm();
+  const mutation = useMutation({
+    mutationFn: (payload: LocalPayload) => createNote(payload),
+    onSuccess: (_, __, context: MutationContext | undefined) => {
+      context?.actions.resetForm();
       queryClient.invalidateQueries({ queryKey: ['notes'] });
       onClose();
     },
@@ -50,15 +53,16 @@ export default function NoteForm({ onClose }: NoteFormProps) {
     },
   });
 
- const handleSubmit = (values: NewNote, actions: FormikHelpers<NewNote>) => {
-  
-    const payload = {
+  const handleSubmit = (values: NewNote, actions: FormikHelpers<NewNote>) => {
+    const payload: LocalPayload = {
       title: values.title,
       content: values.content,
-      categoryId: values.tag, 
+      categoryId: values.tag,
     };
 
-    mutation.mutate({ payload, actions });
+    mutation.mutate(payload, {
+      onSuccess: () => actions.resetForm(), 
+    });
   };
 
   return (
