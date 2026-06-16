@@ -2,12 +2,18 @@ import { ErrorMessage, Field, Form, Formik, type FormikHelpers } from 'formik';
 import css from './NoteForm.module.css';
 import { useId } from 'react';
 import * as Yup from 'yup';
-import type { NewNote, NotePayload } from '@/types/note'; 
+import type { NewNote } from '@/types/note'; 
 import { createNote } from '@/lib/api';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 interface NoteFormProps {
   onClose: () => void;
+}
+
+interface LocalPayload {
+  title: string;
+  content: string;
+  categoryId: string;
 }
 
 const initialValues: NewNote = {
@@ -31,28 +37,29 @@ export default function NoteForm({ onClose }: NoteFormProps) {
   const fieldID = useId();
   const queryClient = useQueryClient();
 
-  const mutation = useMutation({
-  mutationFn: (data: NotePayload) => createNote(data),
-  onSuccess: () => {
-    queryClient.invalidateQueries({ queryKey: ['notes'] });
-    onClose();
-  },
-  onError: (error: Error) => {
-    alert(`Failed to create note: ${error.message}`);
-  },
-});
+ const mutation = useMutation({
+    mutationFn: ({ payload }: { payload: LocalPayload; actions: FormikHelpers<NewNote> }) => 
+      createNote(payload), 
+    onSuccess: (_, variables) => {
+      variables.actions.resetForm();
+      queryClient.invalidateQueries({ queryKey: ['notes'] });
+      onClose();
+    },
+    onError: (error: Error) => {
+      alert(`Failed to create note: ${error.message}`);
+    },
+  });
 
-  const handleSubmit = (values: NewNote, actions: FormikHelpers<NewNote>) => {
- 
-  const payload: NotePayload = {
-    title: values.title,
-    content: values.content,
-    categoryId: values.tag, 
+ const handleSubmit = (values: NewNote, actions: FormikHelpers<NewNote>) => {
+  
+    const payload = {
+      title: values.title,
+      content: values.content,
+      categoryId: values.tag, 
+    };
+
+    mutation.mutate({ payload, actions });
   };
-
-  mutation.mutate(payload);
-  actions.resetForm();
-};
 
   return (
     <Formik

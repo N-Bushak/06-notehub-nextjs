@@ -6,18 +6,11 @@ export interface Note {
   content: string;
   createdAt: string;
   updatedAt: string;
-  tag?: NoteTag;     
-  categoryId: string; 
+  tag: NoteTag; 
 }
 
 export interface NewNote {
   title: string;
   content: string;
   tag: NoteTag;
-}
-
-export interface NotePayload {
-  title: string;
-  content: string;
-  categoryId: string;
 }
