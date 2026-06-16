@@ -7,7 +7,7 @@ import { createNote } from '@/lib/api';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 interface NoteFormProps {
-  onCancel: () => void;
+  onClose: () => void;
 }
 
 const initialValues: NewNote = {
@@ -27,20 +27,20 @@ const FormSchema = Yup.object().shape({
     .required('Tag is required'),
 });
 
-export default function NoteForm({ onCancel }: NoteFormProps) {
+export default function NoteForm({ onClose }: NoteFormProps) {
   const fieldID = useId();
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: createNote,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notes'] });
-      onCancel();
-    },
-    onError: (error: Error) => {
-      alert(`Failed to create note: ${error.message}`);
-    },
-  });
+  mutationFn: (data: NotePayload) => createNote(data),
+  onSuccess: () => {
+    queryClient.invalidateQueries({ queryKey: ['notes'] });
+    onClose();
+  },
+  onError: (error: Error) => {
+    alert(`Failed to create note: ${error.message}`);
+  },
+});
 
   const handleSubmit = (values: NewNote, actions: FormikHelpers<NewNote>) => {
  
@@ -102,7 +102,7 @@ export default function NoteForm({ onCancel }: NoteFormProps) {
         </div>
 
         <div className={css.actions}>
-          <button type="button" className={css.cancelButton} onClick={onCancel}>
+          <button type="button" className={css.cancelButton} onClick={onClose}>
             Cancel
           </button>
           <button type="submit" className={css.submitButton} disabled={mutation.isPending}>
