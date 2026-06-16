@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { CreateNoteDto, Note } from '@/types/note';
+import { NotePayload, Note } from '@/types/note';
 
 const api = axios.create({
   baseURL: 'https://next-v1-notes-api.goit.study/',
@@ -29,7 +29,7 @@ export const fetchNoteById = async (id: string): Promise<Note> => {
   return data;
 };
 
-export const createNote = (data: CreateNoteDto): Promise<Note> => {
+export const createNote = (data: NotePayload): Promise<Note> => {
   return api.post('/notes', data).then(res => res.data);
 };
 
